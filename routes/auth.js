@@ -6,7 +6,7 @@ const { sign } = require("jsonwebtoken");
 const { validateToken } = require("../middleware/auth-mw");
 
 const signAccessToken = (id, username) => {
-  return sign({ id, username }, process.env.LOCAL_JWT_SALT);
+  return sign({ id, username }, process.env.JWT_SALT);
 };
 const successAuthResponse = (res, message, user) => {
   return res.json({
@@ -34,7 +34,7 @@ router.post("/sign-up", async (req, res) => {
   }
 
   await bcrypt
-    .hash(password, parseInt(process.env.LOCAL_PASSWORD_SALT))
+    .hash(password, parseInt(process.env.PASSWORD_SALT))
     .then(async (hashedPassword) => {
       dbUser = await usersTable.create({ username, password: hashedPassword });
       successAuthResponse(res, "User successfully created", dbUser);
@@ -80,7 +80,7 @@ router.post("/update-password", validateToken, async (req, res) => {
   }
 
   await bcrypt
-    .hash(newPassword, parseInt(process.env.LOCAL_PASSWORD_SALT))
+    .hash(newPassword, parseInt(process.env.PASSWORD_SALT))
     .then(async (hashedPassword) => {
       await dbUser.update({ password: hashedPassword });
       successAuthResponse(res, "Password successfully updated", dbUser);

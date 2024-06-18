@@ -16,7 +16,7 @@ const validateToken = async (req, res, next) => {
   }
 
   try {
-    let validToken = verify(accessToken, process.env.LOCAL_JWT_SALT);
+    let validToken = verify(accessToken, process.env.JWT_SALT);
     if (!validToken || !validToken.id) {
       return invalidTokenResponse(res);
     }
