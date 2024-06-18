@@ -13,10 +13,15 @@ app.use("/users", require("./routes/users"));
 
 const db = require("./models");
 
-db.sequelize.sync().then(() => {
-  const port = process.env.PORT || 3001;
+db.sequelize
+  .sync()
+  .then(() => {
+    const port = process.env.PORT || 3001;
 
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log("SEQUELIZE ERROR: ", err);
   });
-});
