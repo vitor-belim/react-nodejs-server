@@ -3,6 +3,8 @@ const { users: usersTable } = require("../models");
 
 const requiredTokenResponse = (res) =>
   res.status(401).send({ message: "Access token required" });
+const expiredTokenResponse = (res) =>
+  res.status(401).send({ message: "Access token expired" });
 const invalidTokenResponse = (res) =>
   res.status(401).send({ message: "Invalid access token" });
 const invalidJWTResponse = (res, error) =>
@@ -19,6 +21,10 @@ const validateToken = async (req, res, next) => {
     let validToken = verify(accessToken, process.env.JWT_SALT);
     if (!validToken || !validToken.id) {
       return invalidTokenResponse(res);
+    }
+
+    if (!validToken.exp || validToken.exp < Math.ceil(Date.now() / 1000)) {
+      return expiredTokenResponse(res);
     }
 
     const dbUser = await usersTable.findByPk(validToken.id);

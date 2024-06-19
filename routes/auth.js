@@ -5,14 +5,20 @@ const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const { validateToken } = require("../middleware/auth-mw");
 
-const signAccessToken = (id, username) => {
-  return sign({ id, username }, process.env.JWT_SALT);
+const signAccessToken = (id, username, expirationInSeconds) => {
+  return sign({ id, username }, process.env.JWT_SALT, {
+    expiresIn: expirationInSeconds,
+  });
 };
 const successAuthResponse = (res, message, user) => {
+  const expirationInSeconds = 30 * 60; // 30 minutes
+  const expirationDate = new Date(Date.now() + expirationInSeconds * 1000);
+
   return res.json({
     message,
     user: { id: user.id, username: user.username },
-    accessToken: signAccessToken(user.id, user.username),
+    accessToken: signAccessToken(user.id, user.username, expirationInSeconds),
+    expiration: expirationDate,
   });
 };
 
@@ -64,7 +70,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/refresh", validateToken, async (req, res) => {
-  successAuthResponse(res, "Access token is valid", req.user);
+  successAuthResponse(res, "Access token refreshed", req.user);
 });
 
 router.post("/update-password", validateToken, async (req, res) => {
