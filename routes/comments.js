@@ -1,13 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const { comments: commentsTable, users: usersTable } = require("../models");
-const { validateToken } = require("../middleware/auth-mw");
+const {
+  comments: commentsTable,
+  users: usersTable,
+  posts: postsTable,
+} = require("../models");
+const {
+  validateToken,
+  validateOptionalToken,
+} = require("../middleware/auth-mw");
 const ResponseHelper = require("../helpers/response-helper");
 
-router.get("/:postId", async (req, res) => {
+const postCommentsDisabledResponse = (res) =>
+  res.status(403).json({ message: "Post comments are disabled" });
+
+router.get("/:postId", validateOptionalToken, async (req, res) => {
+  const dbPost = await postsTable.findByPk(+req.params.postId);
+  if (!dbPost.allowComments && (!req.user || dbPost.user.id !== req.user.id)) {
+    return postCommentsDisabledResponse(res);
+  }
+
   res.json(
     await commentsTable.findAll({
-      where: { postId: req.params.postId },
+      where: { postId: dbPost.id },
       order: [["id", "DESC"]],
       include: usersTable,
     }),
@@ -15,9 +30,14 @@ router.get("/:postId", async (req, res) => {
 });
 
 router.post("/:postId", validateToken, async (req, res) => {
+  const dbPost = await postsTable.findByPk(+req.params.postId);
+  if (!dbPost.allowComments) {
+    return postCommentsDisabledResponse(res);
+  }
+
   let newComment = await commentsTable.create({
     ...req.body,
-    postId: +req.params.postId,
+    postId: dbPost.id,
     userId: req.user.id,
   });
   res.json(await commentsTable.findByPk(newComment.id));
@@ -29,7 +49,11 @@ router.delete("/:commentId", validateToken, async (req, res) => {
   if (!dbComment) {
     return ResponseHelper.entityNotFound(res);
   }
-  if (dbComment.user.id !== req.user.id) {
+
+  if (
+    dbComment.user.id !== req.user.id &&
+    dbComment.post.user.id !== req.user.id
+  ) {
     return ResponseHelper.entityNotOwned(res);
   }
 

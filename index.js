@@ -14,7 +14,7 @@ app.use("/users", require("./routes/users"));
 const db = require("./models");
 
 db.sequelize
-  .sync()
+  .sync({ force: false, alter: true })
   .then(() => {
     const port = process.env.PORT || 3001;
 

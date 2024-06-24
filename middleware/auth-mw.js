@@ -39,4 +39,26 @@ const validateToken = async (req, res, next) => {
   }
 };
 
-module.exports = { validateToken };
+const validateOptionalToken = async (req, res, next) => {
+  try {
+    const accessToken = req.headers["access-token"];
+    if (accessToken) {
+      let validToken = verify(accessToken, process.env.JWT_SALT);
+      if (
+        validToken &&
+        validToken.id &&
+        validToken.exp &&
+        validToken.exp >= Math.ceil(Date.now() / 1000)
+      ) {
+        const dbUser = await usersTable.findByPk(validToken.id);
+        if (dbUser) {
+          req.user = dbUser;
+        }
+      }
+    }
+  } catch (e) {}
+
+  return next();
+};
+
+module.exports = { validateToken, validateOptionalToken };
