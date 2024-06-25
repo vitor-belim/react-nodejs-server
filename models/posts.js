@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     Posts.hasMany(models.likes, {
       onDelete: "CASCADE",
     });
+    Posts.belongsToMany(models.tags, { through: "post-tags" });
 
     Posts.addScope("defaultScope", {
       include: [
@@ -30,6 +31,12 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           model: models.likes,
+        },
+        {
+          model: models.tags,
+          through: {
+            attributes: [],
+          },
         },
       ],
       attributes: {
