@@ -37,9 +37,7 @@ router.put("/:id", validateToken, async (req, res) => {
     return ResponseHelper.entityNotOwned(res);
   }
 
-  if (req.body.tags) {
-    await TagsHelper.associate(dbPost, req.body.tags);
-  }
+  await TagsHelper.associate(dbPost, req.body.tags);
 
   await dbPost.update(req.body);
 

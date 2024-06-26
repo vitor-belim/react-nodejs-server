@@ -2,6 +2,10 @@ const { tags: tagsTable } = require("../models");
 
 class TagsHelper {
   async associate(post, tags) {
+    if (!tags) {
+      return;
+    }
+
     // clear associated tags
     await post.setTags([]);
 
