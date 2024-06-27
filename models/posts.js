@@ -24,6 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     });
     Posts.belongsToMany(models.tags, { through: "post-tags" });
 
+    // Used only when filtering by tag
+    Posts.belongsToMany(models.tags, {
+      through: "post-tags",
+      as: "tags-filter-table",
+    });
+
     Posts.addScope("defaultScope", {
       include: [
         {
@@ -42,6 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       attributes: {
         exclude: ["userId", "createdAt", "updatedAt"],
       },
+      order: [["id", "DESC"]],
     });
   };
 

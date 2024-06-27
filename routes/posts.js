@@ -2,11 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { posts: postsTable } = require("../models");
 const { validateToken } = require("../middleware/auth-mw");
+const PostsSearchHelper = require("../helpers/posts-search-helper");
+const TagsHelper = require("../helpers/tags-helper");
 const ResponseHelper = require("../helpers/response-helper");
-let TagsHelper = require("../helpers/tags-helper");
 
 router.get("/", async (req, res) => {
-  res.json(await postsTable.findAll({ order: [["id", "DESC"]] }));
+  const options = PostsSearchHelper.getQueryOptions(req);
+
+  res.json(await postsTable.findAll(options));
 });
 
 router.post("/", validateToken, async (req, res) => {

@@ -23,7 +23,6 @@ router.get("/:postId", validateOptionalToken, async (req, res) => {
   res.json(
     await commentsTable.findAll({
       where: { postId: dbPost.id },
-      order: [["id", "DESC"]],
       include: usersTable,
     }),
   );

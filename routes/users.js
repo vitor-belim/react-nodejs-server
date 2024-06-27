@@ -21,7 +21,6 @@ router.get("/:id/posts", async (req, res) => {
 
   const posts = await postsTable.findAll({
     where: { userId: req.params.id },
-    order: [["id", "DESC"]],
   });
 
   res.json(posts);

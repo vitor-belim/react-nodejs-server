@@ -11,7 +11,7 @@ const signAccessToken = (id, username, expirationInSeconds) => {
   });
 };
 const successAuthResponse = (res, message, user) => {
-  const expirationInSeconds = 30 * 60; // 30 minutes
+  const expirationInSeconds = 24 * 60 * 60; // 24 hours
   const expirationDate = new Date(Date.now() + expirationInSeconds * 1000);
 
   return res.json({

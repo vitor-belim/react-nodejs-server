@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       attributes: {
         exclude: ["userId", "postId", "createdAt", "updatedAt"],
       },
+      order: [["id", "DESC"]],
     });
   };
 
