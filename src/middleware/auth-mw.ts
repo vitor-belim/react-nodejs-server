@@ -1,3 +1,5 @@
+import { JwtPayload } from "jsonwebtoken";
+
 const { verify } = require("jsonwebtoken");
 const { users: usersTable } = require("../models");
 
@@ -10,6 +12,22 @@ const invalidTokenResponse = (res) =>
 const invalidJWTResponse = (res, error) =>
   res.status(401).send({ message: "JWT decoding failed", error });
 
+class AuthJwt implements JwtPayload {
+  id: number;
+  username: string;
+
+  // Inherited from JwtPayload
+  [key: string]: any;
+
+  aud: string | string[] | undefined;
+  exp: number | undefined;
+  iat: number | undefined;
+  iss: string | undefined;
+  jti: string | undefined;
+  nbf: number | undefined;
+  sub: string | undefined;
+}
+
 const validateToken = async (req, res, next) => {
   const accessToken = req.headers["access-token"];
 
@@ -18,7 +36,7 @@ const validateToken = async (req, res, next) => {
   }
 
   try {
-    let validToken = verify(accessToken, process.env.JWT_SALT);
+    let validToken = <AuthJwt>verify(accessToken, process.env.JWT_SALT);
     if (!validToken || !validToken.id) {
       return invalidTokenResponse(res);
     }
@@ -43,7 +61,7 @@ const validateOptionalToken = async (req, res, next) => {
   try {
     const accessToken = req.headers["access-token"];
     if (accessToken) {
-      let validToken = verify(accessToken, process.env.JWT_SALT);
+      let validToken = <AuthJwt>verify(accessToken, process.env.JWT_SALT);
       if (
         validToken &&
         validToken.id &&

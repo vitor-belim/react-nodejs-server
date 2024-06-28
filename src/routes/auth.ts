@@ -46,7 +46,7 @@ router.post("/sign-up", async (req, res) => {
       successAuthResponse(res, "User successfully created", dbUser);
     })
     .catch((error) => {
-      passwordEncryptionFailedResponse(error);
+      passwordEncryptionFailedResponse(res, error);
     });
 });
 
@@ -76,7 +76,7 @@ router.get("/refresh", validateToken, async (req, res) => {
 router.post("/update-password", validateToken, async (req, res) => {
   const { password, newPassword } = req.body;
 
-  let dbUser = await usersTable.findByPk(req.user.id, {
+  let dbUser = await usersTable.findByPk(req.user?.id, {
     attributes: { include: ["password"] },
   });
 
@@ -92,7 +92,7 @@ router.post("/update-password", validateToken, async (req, res) => {
       successAuthResponse(res, "Password successfully updated", dbUser);
     })
     .catch((error) => {
-      passwordEncryptionFailedResponse(error);
+      passwordEncryptionFailedResponse(res, error);
     });
 });
 

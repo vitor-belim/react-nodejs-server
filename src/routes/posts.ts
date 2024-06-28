@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", validateToken, async (req, res) => {
-  let newPost = await postsTable.create({ ...req.body, userId: req.user.id });
+  let newPost = await postsTable.create({ ...req.body, userId: req.user?.id });
 
   await TagsHelper.associate(newPost, req.body.tags);
 
@@ -36,7 +36,7 @@ router.put("/:id", validateToken, async (req, res) => {
   if (!dbPost) {
     return ResponseHelper.entityNotFound(res);
   }
-  if (dbPost.user.id !== req.user.id) {
+  if (dbPost.user.id !== req.user?.id) {
     return ResponseHelper.entityNotOwned(res);
   }
 
@@ -53,7 +53,7 @@ router.delete("/:id", validateToken, async (req, res) => {
   if (!dbPost) {
     return ResponseHelper.entityNotFound(res);
   }
-  if (dbPost.user.id !== req.user.id) {
+  if (dbPost.user.id !== req.user?.id) {
     return ResponseHelper.entityNotOwned(res);
   }
 

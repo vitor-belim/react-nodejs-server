@@ -1,8 +1,22 @@
+import { FindOptions } from "sequelize";
+
 const { Op } = require("sequelize");
 const { tags: tagsTable } = require("../models");
 
+class Tag {
+  id: number;
+  name: string;
+}
+
+class Post {
+  id: number;
+  title: string;
+  postText: string;
+  tags: Tag[];
+}
+
 class PostsSearchHelper {
-  getQueryOptions(req, options = {}) {
+  getQueryOptions(req, options: FindOptions<Post> = {}) {
     if (!req.query) {
       return options;
     }

@@ -37,21 +37,21 @@ router.post("/:postId", validateToken, async (req, res) => {
   let newComment = await commentsTable.create({
     ...req.body,
     postId: dbPost.id,
-    userId: req.user.id,
+    userId: req.user?.id,
   });
   res.json(await commentsTable.findByPk(newComment.id));
 });
 
-router.delete("/:commentId", validateToken, async (req, res) => {
-  let dbComment = await commentsTable.findByPk(+req.params.commentId);
+router.delete("/:id", validateToken, async (req, res) => {
+  let dbComment = await commentsTable.findByPk(req.params.id);
 
   if (!dbComment) {
     return ResponseHelper.entityNotFound(res);
   }
 
   if (
-    dbComment.user.id !== req.user.id &&
-    dbComment.post.user.id !== req.user.id
+    dbComment.user.id !== req.user?.id &&
+    dbComment.post.user.id !== req.user?.id
   ) {
     return ResponseHelper.entityNotOwned(res);
   }

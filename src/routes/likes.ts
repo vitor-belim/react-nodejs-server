@@ -16,7 +16,7 @@ router.post("/:postId", validateToken, async (req, res) => {
     return ResponseHelper.entityNotFound(res);
   }
 
-  let userId = req.user.id;
+  let userId = req.user?.id;
 
   let like = await likesTable.findOne({
     where: { postId, userId },

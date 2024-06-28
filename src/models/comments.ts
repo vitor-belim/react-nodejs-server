@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+import { DataTypes, Sequelize } from "sequelize";
+
+module.exports = (sequelize: Sequelize, DataTypes: DataTypes) => {
   const Comments = sequelize.define("comments", {
     commentBody: {
       type: DataTypes.TEXT,
