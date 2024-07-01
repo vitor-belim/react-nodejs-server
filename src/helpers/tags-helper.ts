@@ -1,7 +1,10 @@
+import DbPost from "../types/app/DbPost";
+import Tag from "../types/app/simple/Tag";
+
 const { tags: tagsTable } = require("../models");
 
 class TagsHelper {
-  async associate(post, tags) {
+  async associate(post: DbPost, tags: Tag[]) {
     if (!tags) {
       return;
     }

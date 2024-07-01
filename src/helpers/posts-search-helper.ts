@@ -1,40 +1,30 @@
 import { FindOptions } from "sequelize";
+import { Request } from "express";
+import Post from "../types/app/simple/Post";
 
 const { Op } = require("sequelize");
 const { tags: tagsTable } = require("../models");
 
-class Tag {
-  id: number;
-  name: string;
-}
-
-class Post {
-  id: number;
-  title: string;
-  postText: string;
-  tags: Tag[];
-}
-
 class PostsSearchHelper {
-  getQueryOptions(req, options: FindOptions<Post> = {}) {
+  getQueryOptions(req: Request, options: FindOptions<Post> = {}) {
     if (!req.query) {
       return options;
     }
 
-    if (req.query.query) {
+    if (req.query["query"]) {
       options.where = {
         [Op.or]: {
           title: {
-            [Op.like]: `%${req.query.query}%`,
+            [Op.like]: `%${req.query["query"]}%`,
           },
           postText: {
-            [Op.like]: `%${req.query.query}%`,
+            [Op.like]: `%${req.query["query"]}%`,
           },
         },
       };
     }
 
-    if (req.query.tag) {
+    if (req.query["tag"]) {
       options.include = [
         {
           model: tagsTable,
@@ -43,7 +33,7 @@ class PostsSearchHelper {
             attributes: [],
           },
           where: {
-            name: req.query.tag,
+            name: req.query["tag"],
           },
           attributes: [],
         },

@@ -1,21 +1,23 @@
-module.exports = (sequelize, DataTypes) => {
+import { DataTypes, Models, Sequelize } from "sequelize";
+
+module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
   const Posts = sequelize.define("posts", {
     title: {
-      type: DataTypes.STRING,
+      type: dataTypes.STRING,
       allowNull: false,
     },
     postText: {
-      type: DataTypes.TEXT,
+      type: dataTypes.TEXT,
       allowNull: false,
     },
     allowComments: {
-      type: DataTypes.BOOLEAN,
+      type: dataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
     },
   });
 
-  Posts.associate = (models) => {
+  Posts.associate = (models: Models) => {
     Posts.belongsTo(models.users, {
       onDelete: "CASCADE",
     });

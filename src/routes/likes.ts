@@ -1,24 +1,31 @@
+import { Request, Response } from "express";
+import DbPost from "../types/app/DbPost";
+import DbLike from "../types/app/DbLike";
+
 const express = require("express");
 const router = express.Router();
 const { likes: likesTable, posts: postsTable } = require("../models");
 const { validateToken } = require("../middleware/auth-mw");
 const ResponseHelper = require("../helpers/response-helper");
 
-router.get("/:postId", async (req, res) => {
-  res.json(await likesTable.findAll({ where: { postId: req.params.postId } }));
+router.get("/:postId", async (req: Request, res: Response) => {
+  let postId = req.params["postId"];
+
+  res.json(await likesTable.findAll({ where: { postId } }));
 });
 
-router.post("/:postId", validateToken, async (req, res) => {
-  let postId = +req.params.postId;
+router.post("/:postId", validateToken, async (req: Request, res: Response) => {
+  let postId = req.params["postId"];
 
-  let dbPost = await postsTable.findByPk(postId);
+  let dbPost: DbPost = await postsTable.findByPk(postId);
   if (!dbPost) {
-    return ResponseHelper.entityNotFound(res);
+    ResponseHelper.entityNotFound(res);
+    return;
   }
 
   let userId = req.user?.id;
 
-  let like = await likesTable.findOne({
+  let like: DbLike = await likesTable.findOne({
     where: { postId, userId },
   });
 

@@ -1,35 +1,25 @@
-import { JwtPayload } from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
+import AuthJwt from "../types/app/jsonwebtoken/AuthJwt";
+import DbUser from "../types/app/DbUser";
 
 const { verify } = require("jsonwebtoken");
 const { users: usersTable } = require("../models");
 
-const requiredTokenResponse = (res) =>
+const requiredTokenResponse = (res: Response) =>
   res.status(401).send({ message: "Access token required" });
-const expiredTokenResponse = (res) =>
+const expiredTokenResponse = (res: Response) =>
   res.status(401).send({ message: "Access token expired" });
-const invalidTokenResponse = (res) =>
+const invalidTokenResponse = (res: Response) =>
   res.status(401).send({ message: "Invalid access token" });
-const invalidJWTResponse = (res, error) =>
+const invalidJWTResponse = (res: Response, error: Error) =>
   res.status(401).send({ message: "JWT decoding failed", error });
 
-class AuthJwt implements JwtPayload {
-  id: number;
-  username: string;
-
-  // Inherited from JwtPayload
-  [key: string]: any;
-
-  aud: string | string[] | undefined;
-  exp: number | undefined;
-  iat: number | undefined;
-  iss: string | undefined;
-  jti: string | undefined;
-  nbf: number | undefined;
-  sub: string | undefined;
-}
-
-const validateToken = async (req, res, next) => {
-  const accessToken = req.headers["access-token"];
+const validateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const accessToken: string = <string>req.headers["access-token"];
 
   if (!accessToken) {
     return requiredTokenResponse(res);
@@ -45,21 +35,25 @@ const validateToken = async (req, res, next) => {
       return expiredTokenResponse(res);
     }
 
-    const dbUser = await usersTable.findByPk(validToken.id);
+    const dbUser: DbUser = await usersTable.findByPk(validToken.id);
     if (!dbUser) {
       return invalidTokenResponse(res);
     }
 
     req.user = dbUser;
     return next();
-  } catch (e) {
+  } catch (e: Error) {
     return invalidJWTResponse(res, e);
   }
 };
 
-const validateOptionalToken = async (req, res, next) => {
+const validateOptionalToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const accessToken = req.headers["access-token"];
+    const accessToken: string = <string>req.headers["access-token"];
     if (accessToken) {
       let validToken = <AuthJwt>verify(accessToken, process.env.JWT_SALT);
       if (
@@ -68,7 +62,7 @@ const validateOptionalToken = async (req, res, next) => {
         validToken.exp &&
         validToken.exp >= Math.ceil(Date.now() / 1000)
       ) {
-        const dbUser = await usersTable.findByPk(validToken.id);
+        const dbUser: DbUser = await usersTable.findByPk(validToken.id);
         if (dbUser) {
           req.user = dbUser;
         }

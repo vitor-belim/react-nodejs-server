@@ -1,13 +1,15 @@
+import { Response } from "express";
+
 class ResponseHelper {
-  entityNotFound(res) {
+  entityNotFound(res: Response) {
     res.status(400).json({ message: "Entity not found" });
   }
 
-  entityNotOwned(res) {
+  entityNotOwned(res: Response) {
     res.status(403).json({ message: "Entity not owned" });
   }
 
-  entityDeleted(res) {
+  entityDeleted(res: Response) {
     res.json({ message: "Entity deleted" });
   }
 }

@@ -1,3 +1,5 @@
+import { Request, Response } from "express";
+
 const express = require("express");
 const router = express.Router();
 const {
@@ -11,27 +13,36 @@ const {
 } = require("../middleware/auth-mw");
 const ResponseHelper = require("../helpers/response-helper");
 
-const postCommentsDisabledResponse = (res) =>
+const postCommentsDisabledResponse = (res: Response) =>
   res.status(403).json({ message: "Post comments are disabled" });
 
-router.get("/:postId", validateOptionalToken, async (req, res) => {
-  const dbPost = await postsTable.findByPk(+req.params.postId);
-  if (!dbPost.allowComments && (!req.user || dbPost.user.id !== req.user.id)) {
-    return postCommentsDisabledResponse(res);
-  }
+router.get(
+  "/:postId",
+  validateOptionalToken,
+  async (req: Request, res: Response) => {
+    const dbPost = await postsTable.findByPk(req.params["postId"]);
+    if (
+      !dbPost.allowComments &&
+      (!req.user || dbPost.user.id !== req.user.id)
+    ) {
+      postCommentsDisabledResponse(res);
+      return;
+    }
 
-  res.json(
-    await commentsTable.findAll({
-      where: { postId: dbPost.id },
-      include: usersTable,
-    }),
-  );
-});
+    res.json(
+      await commentsTable.findAll({
+        where: { postId: dbPost.id },
+        include: usersTable,
+      }),
+    );
+  },
+);
 
-router.post("/:postId", validateToken, async (req, res) => {
-  const dbPost = await postsTable.findByPk(+req.params.postId);
+router.post("/:postId", validateToken, async (req: Request, res: Response) => {
+  const dbPost = await postsTable.findByPk(req.params["postId"]);
   if (!dbPost.allowComments) {
-    return postCommentsDisabledResponse(res);
+    postCommentsDisabledResponse(res);
+    return;
   }
 
   let newComment = await commentsTable.create({
@@ -42,18 +53,20 @@ router.post("/:postId", validateToken, async (req, res) => {
   res.json(await commentsTable.findByPk(newComment.id));
 });
 
-router.delete("/:id", validateToken, async (req, res) => {
-  let dbComment = await commentsTable.findByPk(req.params.id);
+router.delete("/:id", validateToken, async (req: Request, res: Response) => {
+  let dbComment = await commentsTable.findByPk(req.params["id"]);
 
   if (!dbComment) {
-    return ResponseHelper.entityNotFound(res);
+    ResponseHelper.entityNotFound(res);
+    return;
   }
 
   if (
     dbComment.user.id !== req.user?.id &&
     dbComment.post.user.id !== req.user?.id
   ) {
-    return ResponseHelper.entityNotOwned(res);
+    ResponseHelper.entityNotOwned(res);
+    return;
   }
 
   await dbComment.destroy();
