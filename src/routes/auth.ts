@@ -52,7 +52,7 @@ router.post("/sign-up", async (req: Request, res: Response) => {
   }
 
   await bcrypt
-    .hash(password, parseInt(process.env.PASSWORD_SALT))
+    .hash(password, parseInt(process.env.PASSWORD_SALT || "10"))
     .then(async (hashedPassword: string) => {
       dbUser = await usersTable.create({ username, password: hashedPassword });
       successAuthResponse(res, "User successfully created", dbUser);
@@ -84,7 +84,12 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 router.get("/refresh", validateToken, async (req: Request, res: Response) => {
-  successAuthResponse(res, "Access token refreshed", <DbUser>req.user);
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  successAuthResponse(res, "Access token refreshed", req.user);
 });
 
 router.post(
@@ -104,7 +109,7 @@ router.post(
     }
 
     await bcrypt
-      .hash(newPassword, parseInt(process.env.PASSWORD_SALT))
+      .hash(newPassword, parseInt(process.env.PASSWORD_SALT || "10"))
       .then(async (hashedPassword: string) => {
         await dbUser.update({ password: hashedPassword });
         successAuthResponse(res, "Password successfully updated", dbUser);
