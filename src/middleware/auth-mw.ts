@@ -42,14 +42,14 @@ const validateToken = async (
 
     req.user = dbUser;
     return next();
-  } catch (e: Error) {
+  } catch (e: any) {
     return invalidJWTResponse(res, e);
   }
 };
 
 const validateOptionalToken = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ) => {
   try {

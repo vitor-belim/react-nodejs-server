@@ -1,6 +1,4 @@
-import { DataTypes, Models, Sequelize } from "sequelize";
-
-module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
+module.exports = (sequelize: any, dataTypes: any) => {
   const Posts = sequelize.define("posts", {
     title: {
       type: dataTypes.STRING,
@@ -17,7 +15,7 @@ module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
     },
   });
 
-  Posts.associate = (models: Models) => {
+  Posts.associate = (models: any) => {
     Posts.belongsTo(models.users, {
       onDelete: "CASCADE",
     });

@@ -57,7 +57,7 @@ router.post("/sign-up", async (req: Request, res: Response) => {
       dbUser = await usersTable.create({ username, password: hashedPassword });
       successAuthResponse(res, "User successfully created", dbUser);
     })
-    .catch((error: Error) => {
+    .catch((error: any) => {
       passwordEncryptionFailedResponse(res, error);
     });
 });
@@ -109,7 +109,7 @@ router.post(
         await dbUser.update({ password: hashedPassword });
         successAuthResponse(res, "Password successfully updated", dbUser);
       })
-      .catch((error: Error) => {
+      .catch((error: any) => {
         passwordEncryptionFailedResponse(res, error);
       });
   },

@@ -1,9 +1,7 @@
-import { DataTypes, Models, Sequelize } from "sequelize";
-
-module.exports = (sequelize: Sequelize, _dataTypes: DataTypes) => {
+module.exports = (sequelize: any, _dataTypes: any) => {
   const Likes = sequelize.define("likes", {});
 
-  Likes.associate = (models: Models) => {
+  Likes.associate = (models: any) => {
     Likes.belongsTo(models.users, {
       onDelete: "CASCADE",
     });

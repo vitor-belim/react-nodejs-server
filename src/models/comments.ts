@@ -1,6 +1,4 @@
-import { DataTypes, Models, Sequelize } from "sequelize";
-
-module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
+module.exports = (sequelize: any, dataTypes: any) => {
   const Comments = sequelize.define("comments", {
     commentBody: {
       type: dataTypes.TEXT,
@@ -8,7 +6,7 @@ module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
     },
   });
 
-  Comments.associate = (models: Models) => {
+  Comments.associate = (models: any) => {
     Comments.belongsTo(models.users, {
       onDelete: "CASCADE",
     });

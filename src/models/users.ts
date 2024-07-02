@@ -1,7 +1,5 @@
-import { DataTypes, Model, Models, Sequelize } from "sequelize";
-
-module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
-  const Users: Model<any, any> = sequelize.define("users", {
+module.exports = (sequelize: any, dataTypes: any) => {
+  const Users = sequelize.define("users", {
     username: {
       type: dataTypes.STRING,
       allowNull: false,
@@ -12,7 +10,7 @@ module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
     },
   });
 
-  Users.associate = (_models: Models) => {
+  Users.associate = (_models: any) => {
     Users.addScope("defaultScope", {
       attributes: {
         exclude: ["password", "createdAt", "updatedAt"],

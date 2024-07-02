@@ -11,9 +11,9 @@ app.use("/comments", require("./routes/comments"));
 app.use("/likes", require("./routes/likes"));
 app.use("/users", require("./routes/users"));
 
-const db = require("./models");
+const sequelizeDb = require("./models");
 
-db.sequelize
+sequelizeDb.sequelize
   .sync({ force: false, alter: true })
   .then(() => {
     const port = process.env.PORT || 3001;
@@ -22,6 +22,6 @@ db.sequelize
       console.log(`Server running on port ${port}`);
     });
   })
-  .catch((err) => {
+  .catch((err: any) => {
     console.log("SEQUELIZE ERROR: ", err);
   });

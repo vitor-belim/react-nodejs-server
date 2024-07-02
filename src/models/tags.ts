@@ -1,6 +1,4 @@
-import { DataTypes, Models, Sequelize } from "sequelize";
-
-module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
+module.exports = (sequelize: any, dataTypes: any) => {
   const Tags = sequelize.define("tags", {
     name: {
       type: dataTypes.STRING,
@@ -8,7 +6,7 @@ module.exports = (sequelize: Sequelize, dataTypes: DataTypes) => {
     },
   });
 
-  Tags.associate = (models: Models) => {
+  Tags.associate = (models: any) => {
     Tags.belongsToMany(models.posts, { through: "post-tags" });
 
     Tags.addScope("defaultScope", {
