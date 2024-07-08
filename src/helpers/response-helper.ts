@@ -1,19 +1,54 @@
 import { Response } from "express";
 
-class ResponseHelper {
-  entityNotFound(res: Response) {
-    res.status(400).json({ message: "Entity not found" });
-  }
-
-  entityNotOwned(res: Response) {
-    res.status(403).json({ message: "Entity not owned" });
-  }
-
-  entityDeleted(res: Response) {
-    res.json({ message: "Entity deleted" });
-  }
+interface ApiResponse {
+  status: boolean;
+  message: string;
 }
 
-let instance = new ResponseHelper();
+interface ApiSuccessResponse<T> extends ApiResponse {
+  data: T;
+}
 
-module.exports = instance;
+interface ApiErrorResponse extends ApiResponse {
+  error?: Error;
+}
+
+export default class ResponseHelper {
+  static entityNotFound(res: Response) {
+    this.error(res, "Entity not found");
+  }
+
+  static entityNotOwned(res: Response) {
+    this.error(res, "Entity not owned", 403);
+  }
+
+  static entityDeleted(res: Response) {
+    this.success(res, true, "Entity deleted");
+  }
+
+  static success<T>(res: Response, data: T, message: string = "Success") {
+    res.json(<ApiSuccessResponse<T>>{
+      status: true,
+      message,
+      data,
+    });
+  }
+
+  static error(
+    res: Response,
+    message: string,
+    code: number = 400,
+    error?: Error,
+  ) {
+    const response: ApiErrorResponse = {
+      status: false,
+      message,
+    };
+
+    if (error) {
+      response.error = error;
+    }
+
+    res.status(code).json(response);
+  }
+}

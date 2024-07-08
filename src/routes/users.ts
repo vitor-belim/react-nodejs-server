@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
-import DbUser from "../types/app/DbUser";
+import express, { Request, Response } from "express";
+import ResponseHelper from "../helpers/response-helper";
+import sequelizeDb from "../models";
 import DbPost from "../types/app/DbPost";
+import DbUser from "../types/app/DbUser";
 
-const express = require("express");
 const router = express.Router();
-const { users: usersTable, posts: postsTable } = require("../models");
-const ResponseHelper = require("../helpers/response-helper");
+const { posts: postsTable, users: usersTable } = sequelizeDb;
 
 router.get("/:id", async (req: Request, res: Response) => {
   const dbUser: DbUser = await usersTable.findByPk(req.params["id"]);
@@ -15,7 +15,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     return;
   }
 
-  res.json(dbUser);
+  ResponseHelper.success(res, dbUser);
 });
 
 router.get("/:id/posts", async (req: Request, res: Response) => {
@@ -25,11 +25,11 @@ router.get("/:id/posts", async (req: Request, res: Response) => {
     return;
   }
 
-  const posts: DbPost[] = await postsTable.findAll({
+  const dbPosts: DbPost[] = await postsTable.findAll({
     where: { userId: req.params["id"] },
   });
 
-  res.json(posts);
+  ResponseHelper.success(res, dbPosts);
 });
 
 module.exports = router;

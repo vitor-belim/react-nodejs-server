@@ -1,26 +1,25 @@
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
+import ResponseHelper from "../helpers/response-helper";
+import { validateOptionalToken, validateToken } from "../middleware/auth-mw";
+import sequelizeDb from "../models";
+import DbComment from "../types/app/DbComment";
 
-const express = require("express");
 const router = express.Router();
-const {
-  comments: commentsTable,
-  users: usersTable,
-  posts: postsTable,
-} = require("../models");
-const {
-  validateToken,
-  validateOptionalToken,
-} = require("../middleware/auth-mw");
-const ResponseHelper = require("../helpers/response-helper");
+const { comments: commentsTable, posts: postsTable } = sequelizeDb;
 
 const postCommentsDisabledResponse = (res: Response) =>
-  res.status(403).json({ message: "Post comments are disabled" });
+  ResponseHelper.error(res, "Comments are disabled for this post", 403);
 
 router.get(
   "/:postId",
   validateOptionalToken,
   async (req: Request, res: Response) => {
     const dbPost = await postsTable.findByPk(req.params["postId"]);
+
+    if (!dbPost) {
+      ResponseHelper.entityNotFound(res);
+      return;
+    }
     if (
       !dbPost.allowComments &&
       (!req.user || dbPost.user.id !== req.user.id)
@@ -29,28 +28,33 @@ router.get(
       return;
     }
 
-    res.json(
-      await commentsTable.findAll({
-        where: { postId: dbPost.id },
-        include: usersTable,
-      }),
-    );
+    const dbComments: DbComment[] = await commentsTable.findAll({
+      where: { postId: dbPost.id },
+    });
+    ResponseHelper.success(res, dbComments);
   },
 );
 
 router.post("/:postId", validateToken, async (req: Request, res: Response) => {
   const dbPost = await postsTable.findByPk(req.params["postId"]);
+
+  if (!dbPost) {
+    ResponseHelper.entityNotFound(res);
+    return;
+  }
   if (!dbPost.allowComments) {
     postCommentsDisabledResponse(res);
     return;
   }
 
-  let newComment = await commentsTable.create({
+  const newComment = await commentsTable.create({
     ...req.body,
     postId: dbPost.id,
     userId: req.user?.id,
   });
-  res.json(await commentsTable.findByPk(newComment.id));
+
+  const dbComment: DbComment = await commentsTable.findByPk(newComment.id);
+  ResponseHelper.success(res, dbComment);
 });
 
 router.delete("/:id", validateToken, async (req: Request, res: Response) => {

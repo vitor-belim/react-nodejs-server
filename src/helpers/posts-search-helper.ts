@@ -1,12 +1,12 @@
-import { FindOptions } from "sequelize";
 import { Request } from "express";
+import { FindOptions, Op } from "sequelize";
+import sequelizeDb from "../models";
 import Post from "../types/app/simple/Post";
 
-const { Op } = require("sequelize");
-const { tags: tagsTable } = require("../models");
+const { tags: tagsTable } = sequelizeDb;
 
-class PostsSearchHelper {
-  getQueryOptions(req: Request, options: FindOptions<Post> = {}) {
+export default class PostsSearchHelper {
+  static getQueryOptions(req: Request, options: FindOptions<Post> = {}) {
     if (!req.query) {
       return options;
     }
@@ -43,7 +43,3 @@ class PostsSearchHelper {
     return options;
   }
 }
-
-let instance = new PostsSearchHelper();
-
-module.exports = instance;

@@ -1,17 +1,18 @@
-import { Request, Response } from "express";
-import DbPost from "../types/app/DbPost";
+import express, { Request, Response } from "express";
+import ResponseHelper from "../helpers/response-helper";
+import { validateToken } from "../middleware/auth-mw";
+import sequelizeDb from "../models";
 import DbLike from "../types/app/DbLike";
+import DbPost from "../types/app/DbPost";
 
-const express = require("express");
 const router = express.Router();
-const { likes: likesTable, posts: postsTable } = require("../models");
-const { validateToken } = require("../middleware/auth-mw");
-const ResponseHelper = require("../helpers/response-helper");
+const { likes: likesTable, posts: postsTable } = sequelizeDb;
 
 router.get("/:postId", async (req: Request, res: Response) => {
   let postId = req.params["postId"];
 
-  res.json(await likesTable.findAll({ where: { postId } }));
+  const dbLikes: DbLike[] = await likesTable.findAll({ where: { postId } });
+  ResponseHelper.success(res, dbLikes);
 });
 
 router.post("/:postId", validateToken, async (req: Request, res: Response) => {
@@ -34,10 +35,13 @@ router.post("/:postId", validateToken, async (req: Request, res: Response) => {
       userId,
       postId,
     });
-    res.json(await likesTable.findByPk(like.id));
+
+    const dbLike: DbLike = await likesTable.findByPk(like.id);
+    ResponseHelper.success(res, dbLike);
   } else {
     await like.destroy();
-    res.json({ message: "Like removed" });
+
+    ResponseHelper.success(res, null, "Like removed");
   }
 });
 

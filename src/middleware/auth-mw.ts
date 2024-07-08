@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import AuthJwt from "../types/app/jsonwebtoken/AuthJwt";
+import { verify } from "jsonwebtoken";
+import sequelizeDb from "../models";
 import DbUser from "../types/app/DbUser";
 
-const { verify } = require("jsonwebtoken");
-const { users: usersTable } = require("../models");
+const { users: usersTable } = sequelizeDb;
 
 const requiredTokenResponse = (res: Response) =>
   res.status(401).send({ message: "Access token required" });
@@ -14,7 +14,7 @@ const invalidTokenResponse = (res: Response) =>
 const invalidJWTResponse = (res: Response, error: Error) =>
   res.status(401).send({ message: "JWT decoding failed", error });
 
-const validateToken = async (
+export const validateToken = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -26,16 +26,19 @@ const validateToken = async (
   }
 
   try {
-    let validToken = <AuthJwt>verify(accessToken, process.env.JWT_SALT);
-    if (!validToken || !validToken.id) {
+    let validToken = verify(accessToken, process.env.JWT_SALT || "arandomsalt");
+    if (!validToken || typeof validToken === "string" || !validToken["id"]) {
       return invalidTokenResponse(res);
     }
 
-    if (!validToken.exp || validToken.exp < Math.ceil(Date.now() / 1000)) {
+    if (
+      !validToken["exp"] ||
+      validToken["exp"] < Math.ceil(Date.now() / 1000)
+    ) {
       return expiredTokenResponse(res);
     }
 
-    const dbUser: DbUser = await usersTable.findByPk(validToken.id);
+    const dbUser: DbUser = await usersTable.findByPk(validToken["id"]);
     if (!dbUser) {
       return invalidTokenResponse(res);
     }
@@ -47,7 +50,7 @@ const validateToken = async (
   }
 };
 
-const validateOptionalToken = async (
+export const validateOptionalToken = async (
   req: Request,
   _res: Response,
   next: NextFunction,
@@ -55,14 +58,18 @@ const validateOptionalToken = async (
   try {
     const accessToken: string = <string>req.headers["access-token"];
     if (accessToken) {
-      let validToken = <AuthJwt>verify(accessToken, process.env.JWT_SALT);
+      let validToken = verify(
+        accessToken,
+        process.env.JWT_SALT || "arandomsalt",
+      );
       if (
+        typeof validToken !== "string" &&
         validToken &&
-        validToken.id &&
-        validToken.exp &&
-        validToken.exp >= Math.ceil(Date.now() / 1000)
+        validToken["id"] &&
+        validToken["exp"] &&
+        validToken["exp"] >= Math.ceil(Date.now() / 1000)
       ) {
-        const dbUser: DbUser = await usersTable.findByPk(validToken.id);
+        const dbUser: DbUser = await usersTable.findByPk(validToken["id"]);
         if (dbUser) {
           req.user = dbUser;
         }
@@ -72,5 +79,3 @@ const validateOptionalToken = async (
 
   return next();
 };
-
-module.exports = { validateToken, validateOptionalToken };

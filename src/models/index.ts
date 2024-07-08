@@ -1,30 +1,25 @@
-// @ts-nocheck
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
-const Sequelize = require("sequelize");
-const process = require("process");
+import fs from "fs";
+import path from "path";
+import { DataTypes, Sequelize } from "sequelize";
+import { config } from "../config/config";
+
 require("dotenv").config();
 
-const basename = path.basename(__filename);
-const config = require("../config/config");
-const db = {
+const db: any = {
   sequelize: Sequelize,
   Sequelize: Sequelize,
 };
 
-let sequelize: any;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(
-    config.database,
-    config.username,
-    config.password,
-    config,
-  );
-}
+let sequelize: Sequelize = new Sequelize(
+  config.database || "db",
+  config.username || "root",
+  config.password || "root",
+  config,
+);
+
+const basename = path.basename(__filename);
 
 fs.readdirSync(__dirname)
   .filter((file: string) => {
@@ -37,10 +32,7 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file: string) => {
-    const model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes,
-    );
+    const model = require(path.join(__dirname, file))(sequelize, DataTypes);
     db[model.name] = model;
   });
 
@@ -53,4 +45,4 @@ Object.keys(db).forEach((modelName: string) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-module.exports = db;
+export default db;

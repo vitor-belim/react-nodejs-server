@@ -1,18 +1,19 @@
+import express, { Request, Response } from "express";
+import PostsSearchHelper from "../helpers/posts-search-helper";
+import ResponseHelper from "../helpers/response-helper";
+import TagsHelper from "../helpers/tags-helper";
+import { validateToken } from "../middleware/auth-mw";
+import sequelizeDb from "../models";
 import DbPost from "../types/app/DbPost";
-import { Request, Response } from "express";
 
-const express = require("express");
 const router = express.Router();
-const { posts: postsTable } = require("../models");
-const { validateToken } = require("../middleware/auth-mw");
-const PostsSearchHelper = require("../helpers/posts-search-helper");
-const TagsHelper = require("../helpers/tags-helper");
-const ResponseHelper = require("../helpers/response-helper");
+const { posts: postsTable } = sequelizeDb;
 
 router.get("/", async (req: Request, res: Response) => {
   const options = PostsSearchHelper.getQueryOptions(req);
 
-  res.json(await postsTable.findAll(options));
+  const data: DbPost[] = await postsTable.findAll(options);
+  ResponseHelper.success(res, data);
 });
 
 router.post("/", validateToken, async (req: Request, res: Response) => {
@@ -23,7 +24,8 @@ router.post("/", validateToken, async (req: Request, res: Response) => {
 
   await TagsHelper.associate(newPost, req.body.tags);
 
-  res.json(await postsTable.findByPk(newPost.id));
+  const data: DbPost = await postsTable.findByPk(newPost.id);
+  ResponseHelper.success(res, data);
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
@@ -34,7 +36,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     return;
   }
 
-  res.json(dbPost);
+  ResponseHelper.success(res, dbPost);
 });
 
 router.put("/:id", validateToken, async (req: Request, res: Response) => {
@@ -53,7 +55,8 @@ router.put("/:id", validateToken, async (req: Request, res: Response) => {
 
   await dbPost.update(req.body);
 
-  res.json(await postsTable.findByPk(req.params["id"]));
+  const data: DbPost = await postsTable.findByPk(req.params["id"]);
+  ResponseHelper.success(res, data);
 });
 
 router.delete("/:id", validateToken, async (req: Request, res: Response) => {

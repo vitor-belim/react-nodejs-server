@@ -1,10 +1,11 @@
+import sequelizeDb from "../models";
 import DbPost from "../types/app/DbPost";
 import Tag from "../types/app/simple/Tag";
 
-const { tags: tagsTable } = require("../models");
+const { tags: tagsTable } = sequelizeDb;
 
-class TagsHelper {
-  async associate(post: DbPost, tags: Tag[]) {
+export default class TagsHelper {
+  static async associate(post: DbPost, tags: Tag[]) {
     if (!tags) {
       return;
     }
@@ -24,7 +25,3 @@ class TagsHelper {
     }
   }
 }
-
-let instance = new TagsHelper();
-
-module.exports = instance;

@@ -1,46 +1,65 @@
-import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import express, { Request, Response } from "express";
+import { sign } from "jsonwebtoken";
+import ResponseHelper from "../helpers/response-helper";
+import { validateToken } from "../middleware/auth-mw";
+import sequelizeDb from "../models";
 import DbUser from "../types/app/DbUser";
 
-const express = require("express");
 const router = express.Router();
-const { users: usersTable } = require("../models");
-const bcrypt = require("bcrypt");
-const { sign } = require("jsonwebtoken");
-const { validateToken } = require("../middleware/auth-mw");
+const { users: usersTable } = sequelizeDb;
+
+interface SimpleUser {
+  id: number;
+  username: string;
+}
+
+interface AuthResponse {
+  accessToken: string;
+  expiration: Date;
+  user: SimpleUser;
+}
 
 const signAccessToken = (
   id: number,
   username: string,
   expirationInSeconds: number,
 ) => {
-  return sign({ id, username }, process.env.JWT_SALT, {
+  return sign({ id, username }, process.env.JWT_SALT || "arandomsalt", {
     expiresIn: expirationInSeconds,
   });
 };
+
 const successAuthResponse = (res: Response, message: string, user: DbUser) => {
   const expirationInSeconds = 24 * 60 * 60; // 24 hours
-  const expirationDate = new Date(Date.now() + expirationInSeconds * 1000);
+  const expiration = new Date(Date.now() + expirationInSeconds * 1000);
 
-  return res.json({
-    message,
-    user: { id: user.id, username: user.username },
-    accessToken: signAccessToken(
-      user.id,
-      <string>user.username,
-      expirationInSeconds,
-    ),
-    expiration: expirationDate,
-  });
+  const simpleUser: SimpleUser = { id: user.id, username: user.username || "" };
+  const accessToken = signAccessToken(
+    simpleUser.id,
+    simpleUser.username,
+    expirationInSeconds,
+  );
+
+  const authResponse: AuthResponse = {
+    accessToken,
+    expiration,
+    user: simpleUser,
+  };
+
+  ResponseHelper.success(res, authResponse, message);
 };
 
 const usernameNotAvailableResponse = (res: Response) =>
-  res.status(400).json({ message: "Username is already in use" });
+  ResponseHelper.error(res, "Username is already in use");
 const passwordEncryptionFailedResponse = (res: Response, error: Error) =>
-  res.status(400).json({ message: "Password encryption failed", error });
+  ResponseHelper.error(res, "Password encryption failed", 400, error);
 const invalidAuthResponse = (res: Response) =>
-  res.status(400).json({ message: "Invalid username or password" });
+  ResponseHelper.error(res, "Invalid username or password");
 const invalidPasswordResponse = (res: Response) =>
-  res.status(400).json({ message: "Invalid password" });
+  ResponseHelper.error(res, "Invalid password");
+const unauthorizedResponse = (res: Response) =>
+  ResponseHelper.error(res, "Unauthorized", 401);
 
 router.post("/sign-up", async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -74,7 +93,7 @@ router.post("/login", async (req: Request, res: Response) => {
     return;
   }
 
-  const saltRes = await bcrypt.compare(password, dbUser.password);
+  const saltRes = await bcrypt.compare(password, dbUser.password || "");
   if (!saltRes) {
     invalidAuthResponse(res);
     return;
@@ -85,7 +104,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
 router.get("/refresh", validateToken, async (req: Request, res: Response) => {
   if (!req.user) {
-    res.status(401).json({ message: "Unauthorized" });
+    unauthorizedResponse(res);
     return;
   }
 
@@ -102,7 +121,7 @@ router.post(
       attributes: { include: ["password"] },
     });
 
-    const saltRes = await bcrypt.compare(password, dbUser.password);
+    const saltRes = await bcrypt.compare(password, dbUser.password || "");
     if (!saltRes) {
       invalidPasswordResponse(res);
       return;

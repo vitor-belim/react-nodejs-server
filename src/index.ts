@@ -1,6 +1,8 @@
-const express = require("express");
+import cors from "cors";
+import express from "express";
+import sequelizeDb from "./models";
+
 const app = express();
-const cors = require("cors");
 
 app.use(express.json());
 app.use(cors());
@@ -10,8 +12,6 @@ app.use("/posts", require("./routes/posts"));
 app.use("/comments", require("./routes/comments"));
 app.use("/likes", require("./routes/likes"));
 app.use("/users", require("./routes/users"));
-
-const sequelizeDb = require("./models");
 
 sequelizeDb.sequelize
   .sync({ force: false, alter: true })

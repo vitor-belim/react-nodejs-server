@@ -1,19 +1,17 @@
-import Post from "./simple/Post";
-import DbTiming from "./sequelize/DbTiming";
+import DbLike from "./DbLike";
 import DbTag from "./DbTag";
 import DbUser from "./DbUser";
+import DbTiming from "./sequelize/DbTiming";
 import SequelizeObject from "./sequelize/SequelizeObject";
+import Post from "./simple/Post";
 
 export default interface DbPost extends Post, DbTiming, SequelizeObject<Post> {
   id: number;
-  userId: number;
+  user: DbUser;
+  likes: DbLike[];
+  tags: DbTag[];
 
   addTags(tag: DbTag): Promise<void>;
 
   setTags(tags: DbTag[]): Promise<void>;
-
-  tags?: DbTag[];
-  user: DbUser;
-
-  update(post: Post): Promise<void>;
 }
