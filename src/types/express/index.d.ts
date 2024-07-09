@@ -4,6 +4,7 @@ import DbUser from "../app/DbUser";
 
 declare global {
   namespace Express {
+    // noinspection JSUnusedGlobalSymbols
     interface Request {
       user?: DbUser;
     }

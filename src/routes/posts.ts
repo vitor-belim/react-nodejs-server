@@ -5,14 +5,28 @@ import TagsHelper from "../helpers/tags-helper";
 import { validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
 import DbPost from "../types/app/DbPost";
+import DbUser from "../types/app/DbUser";
 
 const router = express.Router();
-const { posts: postsTable } = sequelizeDb;
+const { posts: postsTable, users: usersTable } = sequelizeDb;
 
 router.get("/", async (req: Request, res: Response) => {
   const options = PostsSearchHelper.getQueryOptions(req);
 
   const data: DbPost[] = await postsTable.findAll(options);
+  ResponseHelper.success(res, data);
+});
+
+router.get("/by-user/:id", async (req: Request, res: Response) => {
+  const dbUser: DbUser = await usersTable.findByPk(req.params["id"]);
+  if (!dbUser) {
+    ResponseHelper.entityNotFound(res);
+    return;
+  }
+
+  const data: DbPost[] = await postsTable.findAll({
+    where: { userId: dbUser.id },
+  });
   ResponseHelper.success(res, data);
 });
 

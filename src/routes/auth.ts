@@ -25,7 +25,7 @@ const signAccessToken = (
   username: string,
   expirationInSeconds: number,
 ) => {
-  return sign({ id, username }, process.env.JWT_SALT || "arandomsalt", {
+  return sign({ id, username }, process.env.JWT_SALT || "RandomSalt", {
     expiresIn: expirationInSeconds,
   });
 };

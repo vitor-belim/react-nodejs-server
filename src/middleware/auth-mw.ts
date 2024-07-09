@@ -26,7 +26,7 @@ export const validateToken = async (
   }
 
   try {
-    let validToken = verify(accessToken, process.env.JWT_SALT || "arandomsalt");
+    let validToken = verify(accessToken, process.env.JWT_SALT || "RandomSalt");
     if (!validToken || typeof validToken === "string" || !validToken["id"]) {
       return invalidTokenResponse(res);
     }
@@ -60,7 +60,7 @@ export const validateOptionalToken = async (
     if (accessToken) {
       let validToken = verify(
         accessToken,
-        process.env.JWT_SALT || "arandomsalt",
+        process.env.JWT_SALT || "RandomSalt",
       );
       if (
         typeof validToken !== "string" &&
