@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { FindOptions, Op } from "sequelize";
 import sequelizeDb from "../models";
-import Post from "../types/app/simple/Post";
+import Post from "../types/app/db-objects/simple/Post";
 
 const { tags: tagsTable } = sequelizeDb;
 

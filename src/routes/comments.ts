@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import ResponseHelper from "../helpers/response-helper";
 import { validateOptionalToken, validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
-import DbComment from "../types/app/DbComment";
+import DbComment from "../types/app/db-objects/DbComment";
 
 const router = express.Router();
 const { comments: commentsTable, posts: postsTable } = sequelizeDb;

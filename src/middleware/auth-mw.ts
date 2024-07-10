@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import sequelizeDb from "../models";
-import DbUser from "../types/app/DbUser";
+import DbUser from "../types/app/db-objects/DbUser";
 
 const { users: usersTable } = sequelizeDb;
 

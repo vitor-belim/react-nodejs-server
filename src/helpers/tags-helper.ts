@@ -1,6 +1,6 @@
 import sequelizeDb from "../models";
-import DbPost from "../types/app/DbPost";
-import Tag from "../types/app/simple/Tag";
+import DbPost from "../types/app/db-objects/DbPost";
+import Tag from "../types/app/db-objects/simple/Tag";
 
 const { tags: tagsTable } = sequelizeDb;
 

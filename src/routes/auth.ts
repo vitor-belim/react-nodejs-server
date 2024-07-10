@@ -4,7 +4,7 @@ import { sign } from "jsonwebtoken";
 import ResponseHelper from "../helpers/response-helper";
 import { validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
-import DbUser from "../types/app/DbUser";
+import DbUser from "../types/app/db-objects/DbUser";
 
 const router = express.Router();
 const { users: usersTable } = sequelizeDb;

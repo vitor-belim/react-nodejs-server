@@ -2,8 +2,8 @@ import express, { Request, Response } from "express";
 import ResponseHelper from "../helpers/response-helper";
 import { validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
-import DbLike from "../types/app/DbLike";
-import DbPost from "../types/app/DbPost";
+import DbLike from "../types/app/db-objects/DbLike";
+import DbPost from "../types/app/db-objects/DbPost";
 
 const router = express.Router();
 const { likes: likesTable, posts: postsTable } = sequelizeDb;

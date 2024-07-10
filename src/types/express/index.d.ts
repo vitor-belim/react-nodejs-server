@@ -1,4 +1,4 @@
-import DbUser from "../app/DbUser";
+import DbUser from "../app/db-objects/DbUser";
 
 // This file adds the "user" field to the Request class from Express
 
