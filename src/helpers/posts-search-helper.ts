@@ -5,8 +5,8 @@ import Post from "../types/app/db-objects/simple/Post";
 
 const { tags: tagsTable } = sequelizeDb;
 
-export default class PostsSearchHelper {
-  static getQueryOptions(req: Request, options: FindOptions<Post> = {}) {
+class PostsSearchHelper {
+  getQueryOptions(req: Request, options: FindOptions<Post> = {}) {
     if (!req.query) {
       return options;
     }
@@ -43,3 +43,6 @@ export default class PostsSearchHelper {
     return options;
   }
 }
+
+const postsSearchHelper = new PostsSearchHelper();
+export default postsSearchHelper;

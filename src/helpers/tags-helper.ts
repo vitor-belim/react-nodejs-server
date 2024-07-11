@@ -4,8 +4,8 @@ import Tag from "../types/app/db-objects/simple/Tag";
 
 const { tags: tagsTable } = sequelizeDb;
 
-export default class TagsHelper {
-  static async associate(post: DbPost, tags: Tag[]) {
+class TagsHelper {
+  async associate(post: DbPost, tags: Tag[]) {
     if (!tags) {
       return;
     }
@@ -25,3 +25,6 @@ export default class TagsHelper {
     }
   }
 }
+
+const tagsHelper = new TagsHelper();
+export default tagsHelper;

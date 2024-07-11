@@ -1,1 +1,3 @@
-export default interface Like {}
+export default interface Like {
+  postId?: number;
+}

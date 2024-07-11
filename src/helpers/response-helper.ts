@@ -13,20 +13,20 @@ interface ApiErrorResponse extends ApiResponse {
   error?: Error;
 }
 
-export default class ResponseHelper {
-  static entityNotFound(res: Response) {
+class ResponseHelper {
+  entityNotFound(res: Response) {
     this.error(res, "Entity not found");
   }
 
-  static entityNotOwned(res: Response) {
+  entityNotOwned(res: Response) {
     this.error(res, "Entity not owned", 403);
   }
 
-  static entityDeleted(res: Response) {
+  entityDeleted(res: Response) {
     this.success(res, true, "Entity deleted");
   }
 
-  static success<T>(res: Response, data: T, message: string = "Success") {
+  success<T>(res: Response, data: T, message: string = "Success") {
     res.json(<ApiSuccessResponse<T>>{
       status: true,
       message,
@@ -34,12 +34,7 @@ export default class ResponseHelper {
     });
   }
 
-  static error(
-    res: Response,
-    message: string,
-    code: number = 400,
-    error?: Error,
-  ) {
+  error(res: Response, message: string, code: number = 400, error?: Error) {
     const response: ApiErrorResponse = {
       status: false,
       message,
@@ -52,3 +47,6 @@ export default class ResponseHelper {
     res.status(code).json(response);
   }
 }
+
+const responseHelper = new ResponseHelper();
+export default responseHelper;

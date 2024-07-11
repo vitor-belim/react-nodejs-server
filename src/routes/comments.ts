@@ -1,8 +1,11 @@
 import express, { Request, Response } from "express";
+import { FindOptions } from "sequelize";
+import PaginationHelper from "../helpers/pagination-helper";
 import ResponseHelper from "../helpers/response-helper";
 import { validateOptionalToken, validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
 import DbComment from "../types/app/db-objects/DbComment";
+import Comment from "../types/app/db-objects/simple/Comment";
 
 const router = express.Router();
 const { comments: commentsTable, posts: postsTable } = sequelizeDb;
@@ -28,10 +31,13 @@ router.get(
       return;
     }
 
-    const dbComments: DbComment[] = await commentsTable.findAll({
-      where: { postId: dbPost.id },
-    });
-    ResponseHelper.success(res, dbComments);
+    const options: FindOptions<Comment> = { where: { postId: dbPost.id } };
+    const paginatedResponse = await PaginationHelper.getPaginatedResponse(
+      req,
+      commentsTable,
+      options,
+    );
+    ResponseHelper.success(res, paginatedResponse);
   },
 );
 

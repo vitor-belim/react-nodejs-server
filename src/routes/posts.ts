@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import PaginationHelper from "../helpers/pagination-helper";
 import PostsSearchHelper from "../helpers/posts-search-helper";
 import ResponseHelper from "../helpers/response-helper";
 import TagsHelper from "../helpers/tags-helper";
@@ -6,32 +7,17 @@ import { validateToken } from "../middleware/auth-mw";
 import sequelizeDb from "../models";
 import DbPost from "../types/app/db-objects/DbPost";
 import DbUser from "../types/app/db-objects/DbUser";
-import PaginatedResponse from "../types/app/paginated-response";
 
 const router = express.Router();
 const { posts: postsTable, users: usersTable } = sequelizeDb;
 
 router.get("/", async (req: Request, res: Response) => {
   const options = PostsSearchHelper.getQueryOptions(req);
-  const page = parseInt(req.query.page as string) || 0;
-  const limit = parseInt(req.query.limit as string) || 5;
-
-  const items: DbPost[] = await postsTable.findAll({
-    ...options,
-    offset: page * limit,
-    limit: limit,
-  });
-  // TODO: check count results when filtering by tag name
-  const total: number = await postsTable.count({ include: false });
-  const pages: number = Math.ceil(total / limit);
-
-  const paginatedResponse: PaginatedResponse<DbPost> = {
-    total,
-    limit,
-    page,
-    pages,
-    items,
-  };
+  const paginatedResponse = await PaginationHelper.getPaginatedResponse(
+    req,
+    postsTable,
+    options,
+  );
   ResponseHelper.success(res, paginatedResponse);
 });
 
@@ -42,10 +28,15 @@ router.get("/by-user/:id", async (req: Request, res: Response) => {
     return;
   }
 
-  const data: DbPost[] = await postsTable.findAll({
+  const options = PostsSearchHelper.getQueryOptions(req, {
     where: { userId: dbUser.id },
   });
-  ResponseHelper.success(res, data);
+  const paginatedResponse = await PaginationHelper.getPaginatedResponse(
+    req,
+    postsTable,
+    options,
+  );
+  ResponseHelper.success(res, paginatedResponse);
 });
 
 router.post("/", validateToken, async (req: Request, res: Response) => {
