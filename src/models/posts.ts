@@ -24,12 +24,6 @@ module.exports = (sequelize: any, dataTypes: any) => {
     });
     Posts.belongsToMany(models.tags, { through: "post-tags" });
 
-    // Used only when filtering by tag
-    Posts.belongsToMany(models.tags, {
-      through: "post-tags",
-      as: "tags-filter-table",
-    });
-
     Posts.addScope("defaultScope", {
       include: [
         {
