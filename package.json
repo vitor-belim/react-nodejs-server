@@ -11,7 +11,8 @@
     "start-dev": "nodemon src/index.ts",
     "tsc": "tsc",
     "postinstall": "npm run tsc",
-    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts"
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
+    "start-local-mysql": "/usr/local/mysql/support-files/mysql.server start"
   },
   "license": "ISC",
   "devDependencies": {
